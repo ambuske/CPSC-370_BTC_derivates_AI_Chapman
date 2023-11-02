@@ -1,0 +1,36 @@
+def place_order(order, order_book):
+	order_book.append(order)
+	order_book.sort(key=lambda x: x.price, reverse=True)
+	return order_book
+def cancelOrder(id, order_book):
+    new_order_book = order_book.copy()
+    for order in new_order_book:
+        if order['id'] == id:
+            new_order_book.remove(order)
+    return new_order_book
+def matchOrders(order_book):
+    matched_orders = []
+    new_order_book = OrderBook()
+
+   
+    for buy_order in order_book.buy_orders:
+        for sell_order in order_book.sell_orders:
+            if buy_order.price == sell_order.price:
+                
+                matched_quantity = min(buy_order.quantity, sell_order.quantity)
+
+                
+                matched_orders.append(Order(buy_order.price, matched_quantity))
+
+               
+                buy_order.quantity -= matched_quantity
+                sell_order.quantity -= matched_quantity
+
+                
+                if buy_order.quantity > 0:
+                    new_order_book.buy_orders.append(buy_order)
+
+                
+                if sell_order.quantity > 0:
+                    new_order_book.sell_orders.append(sell_order)
+    return new_order_book, matched_orders

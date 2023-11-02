@@ -1,0 +1,70 @@
+class AMM:
+    def __init__(self, x, y):
+        self.reserve_x = x
+        self.reserve_y = y
+
+    def addLiquidity(self, amount_x, amount_y):
+        # Calculate the new reserves after adding liquidity
+        new_reserve_x = self.reserve_x + amount_x
+        new_reserve_y = self.reserve_y + amount_y
+
+        # Update the reserves
+        self.reserve_x = new_reserve_x
+        self.reserve_y = new_reserve_y
+
+        return new_reserve_x, new_reserve_y
+
+    def removeLiquidity(self, proportion, total_liquidity):
+        # Calculate the amounts to remove
+        amount_x = int(self.reserve_x * proportion / total_liquidity)
+        amount_y = int(self.reserve_y * proportion / total_liquidity)
+
+        # Calculate the new reserves after removing liquidity
+        new_reserve_x = self.reserve_x - amount_x
+        new_reserve_y = self.reserve_y - amount_y
+
+        # Update the reserves
+        self.reserve_x = new_reserve_x
+        self.reserve_y = new_reserve_y
+
+        return new_reserve_x, new_reserve_y, amount_x, amount_y
+
+    def swap(self, token_to_remove, amount_to_remove):
+        if token_to_remove == 'X':
+            # Calculate the amount of Y to receive
+            amount_y = (self.reserve_x * self.reserve_y) // (self.reserve_x - amount_to_remove)
+            # Calculate the new reserves after the swap
+            new_reserve_x = self.reserve_x - amount_to_remove
+            new_reserve_y = self.reserve_y + amount_y
+        elif token_to_remove == 'Y':
+            # Calculate the amount of X to receive
+            amount_x = (self.reserve_x * self.reserve_y) // (self.reserve_y - amount_to_remove)
+            # Calculate the new reserves after the swap
+            new_reserve_x = self.reserve_x + amount_x
+            new_reserve_y = self.reserve_y - amount_to_remove
+        else:
+            raise ValueError("Invalid token to remove")
+
+        # Update the reserves
+        self.reserve_x = new_reserve_x
+        self.reserve_y = new_reserve_y
+
+        return new_reserve_x, new_reserve_y, amount_x if token_to_remove == 'X' else amount_y
+
+# Example usage
+amm = AMM(100, 200)
+
+# Add liquidity
+new_reserve_x, new_reserve_y = amm.addLiquidity(20, 30)
+print(f"New Reserves after adding liquidity: X={new_reserve_x}, Y={new_reserve_y}")
+
+# Remove liquidity
+new_reserve_x, new_reserve_y, amount_x, amount_y = amm.removeLiquidity(0.5, 50)
+print(f"New Reserves after removing liquidity: X={new_reserve_x}, Y={new_reserve_y}")
+print(f"Amounts removed: X={amount_x}, Y={amount_y}")
+
+# Swap X for Y
+new_reserve_x, new_reserve_y, amount_received = amm.swap('X', 10)
+print(f"New Reserves after swapping X for Y: X={new_reserve_x}, Y={new_reserve_y}")
+print(f"Amount of Y received: {amount_received}")
+
